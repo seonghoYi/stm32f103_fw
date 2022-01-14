@@ -3,6 +3,9 @@
 
 #include "hw_def.h"
 
+#include "i2c.h"
+#include "lcd.h"
+
 
 void hwInit();
 
