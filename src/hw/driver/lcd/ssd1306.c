@@ -23,7 +23,7 @@ uint32_t getHeight(void);
 bool ssd1306CommandWrite(uint8_t cmd)
 {
 	bool ret = false;
-	if(i2cMemWrite(_DEF_SSD1306, _DEF_SSD1306_I2C_ADDR, 0x00, 1, &cmd, 1) != 0);
+	if(i2cMemWrite(_DEF_SSD1306, _DEF_SSD1306_I2C_ADDR, 0x00, 1, &cmd, 1) != 0)
 	{
 		ret = true;
 	}
@@ -59,35 +59,54 @@ bool ssd1306Reset(void)
 {
 	bool ret = true;
 
-	ssd1306CommandWrite(0xA8);
-	ssd1306CommandWrite(0x3F); // set mux ratio
+	ssd1306CommandWrite(0xAE); //Off display
 
-	ssd1306CommandWrite(0xD3);
-	ssd1306CommandWrite(0x00); // set display offset
+	ssd1306CommandWrite(0x20); //Set memory addressing mode
+	ssd1306CommandWrite(0x00); //00b: Horizontal addr
 
-	ssd1306CommandWrite(0x40); // set display start line
+	ssd1306CommandWrite(0xB0); //Set page start address
 
-	ssd1306CommandWrite(0xA0); // set segment re-map
+	ssd1306CommandWrite(0xC8); //Set COM output direction
 
-	ssd1306CommandWrite(0xC8); // set COM output scan direction
+	ssd1306CommandWrite(0x00); //Set low column address
+	ssd1306CommandWrite(0x10); //Set high column address
 
-	ssd1306CommandWrite(0xDA); // set COM pins hardware configuration
-	ssd1306CommandWrite(0x12);
+	ssd1306CommandWrite(0x40); //Set start line address
 
 	ssd1306CommandWrite(0x81);
-	ssd1306CommandWrite(0x7F); // set contrast control
+	ssd1306CommandWrite(0x7F); //Set contrast control
 
-	ssd1306CommandWrite(0xA4); // disable entire display on
+	ssd1306CommandWrite(0xA1); //Set segment re-map
 
-	ssd1306CommandWrite(0xA6); // set normal display
+	ssd1306CommandWrite(0xA6); //Set normal color
 
-	ssd1306CommandWrite(0xD5); // set osc frequency
-	ssd1306CommandWrite(0x80);
+	ssd1306CommandWrite(0xA8); //Set multiplex ratio
+	ssd1306CommandWrite(0x3F);
 
-	ssd1306CommandWrite(0x8D); // enable charge pump regulator
+	ssd1306CommandWrite(0xA4); //Set display RAM content
+
+	ssd1306CommandWrite(0xD3); //Set display offset
+	ssd1306CommandWrite(0x00); //Offset
+
+	ssd1306CommandWrite(0xD5); //Set display clock divide ratio
+	ssd1306CommandWrite(0xF0); //Set divide ratio
+
+	ssd1306CommandWrite(0xD9); //Set precharge period
+	ssd1306CommandWrite(0x22);
+
+	ssd1306CommandWrite(0xDA);
+	ssd1306CommandWrite(0x12); //Set COM pins hardware config
+
+	ssd1306CommandWrite(0xDB); //Set vcomh
+	ssd1306CommandWrite(0x20); //0.77vcc
+
+	ssd1306CommandWrite(0x8D); //Set DC-DC enable
 	ssd1306CommandWrite(0x14);
 
-	ssd1306CommandWrite(0xAF); // display on
+	ssd1306CommandWrite(0xAF); //On display
+
+
+
 
 	return ret;
 }
