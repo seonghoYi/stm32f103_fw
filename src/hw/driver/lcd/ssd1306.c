@@ -9,7 +9,12 @@
 
 
 #define _DEF_SSD1306						_DEF_I2C1
-#define _DEF_SSD1306_I2C_ADDR		0x3C
+#define _DEF_SSD1306_I2C_ADDR		(0x3C << 1)
+
+
+
+static uint8_t buffer[128*64/8];
+
 
 
 
@@ -59,10 +64,13 @@ bool ssd1306Reset(void)
 {
 	bool ret = true;
 
+	i2cBegin(_DEF_I2C1, 100);
+
+
 	ssd1306CommandWrite(0xAE); //Off display
 
 	ssd1306CommandWrite(0x20); //Set memory addressing mode
-	ssd1306CommandWrite(0x00); //00b: Horizontal addr
+	ssd1306CommandWrite(0x00); //00b: Horizontal addressing mode 01b: Vertical addressing mode 10b: Page addressing mode
 
 	ssd1306CommandWrite(0xB0); //Set page start address
 
@@ -106,6 +114,13 @@ bool ssd1306Reset(void)
 	ssd1306CommandWrite(0xAF); //On display
 
 
+
+	memset(buffer, 0xFF, sizeof(buffer));
+
+	for (int i = 0; i < 8; i++)
+	{
+		i2cMemWrite(_DEF_SSD1306, _DEF_SSD1306_I2C_ADDR, 0x40, 1, &buffer[128 * i], 128);
+	}
 
 
 	return ret;
