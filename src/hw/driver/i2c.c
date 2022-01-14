@@ -5,6 +5,14 @@
 
 
 
+
+
+
+I2C_HandleTypeDef hi2c1;
+
+
+
+
 typedef struct
 {
 	bool is_init;
@@ -15,9 +23,6 @@ typedef struct
 
 
 i2c_tbl_t i2c_tbl[I2C_CH_MAX];
-
-
-I2C_HandleTypeDef hi2c1;
 
 
 
@@ -32,29 +37,30 @@ bool i2cInit()
 	return true;
 }
 
-bool i2cBegin(uint8_t ch)
+bool i2cBegin(uint8_t ch, uint32_t freq_khz)
 {
 	bool ret = false;
 
-	I2C_HandleTypeDef *p_handle = i2c_tbl[ch].p_hi2c;
+	i2c_tbl_t *p_i2c = &i2c_tbl[ch];
 
 
 	switch(ch)
 	{
 		case _DEF_I2C1:
-			p_handle->Instance = I2C1;
-			p_handle->Init.ClockSpeed = 100000;
-			p_handle->Init.DutyCycle = I2C_DUTYCYCLE_2;
-			p_handle->Init.OwnAddress1 = 0;
-			p_handle->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
-			p_handle->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-			p_handle->Init.OwnAddress2 = 0;
-			p_handle->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-			p_handle->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+			p_i2c->p_hi2c = &hi2c1;
+			p_i2c->p_hi2c->Instance = I2C1;
+			p_i2c->p_hi2c->Init.ClockSpeed = freq_khz * 1000;
+			p_i2c->p_hi2c->Init.DutyCycle = I2C_DUTYCYCLE_2;
+			p_i2c->p_hi2c->Init.OwnAddress1 = 0;
+			p_i2c->p_hi2c->Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+			p_i2c->p_hi2c->Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+			p_i2c->p_hi2c->Init.OwnAddress2 = 0;
+			p_i2c->p_hi2c->Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+			p_i2c->p_hi2c->Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
 
 
-
-		  if (HAL_I2C_Init(p_handle) != HAL_OK)
+			HAL_I2C_DeInit(&hi2c1);
+		  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
 		  {
 		    Error_Handler();
 		  }
