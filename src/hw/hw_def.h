@@ -15,7 +15,8 @@
 
 
 #define _USE_HW_LCD
-
+#define 		 HW_LCD_WIDTH			128
+#define 		 HW_LCD_HEIGHT		64
 
 
 #endif /* SRC_HW_HW_DEF_H_ */
