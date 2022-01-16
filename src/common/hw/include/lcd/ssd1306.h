@@ -14,6 +14,10 @@ extern "C" {
 #include "lcd.h"
 
 
+#define SSD1306_WIDTH						128
+#define SSD1306_HEIGHT					64
+
+
 
 bool ssd1306Init(void);
 bool ssd1306DriverInit(lcd_driver_t *lcd_driver);
