@@ -9,6 +9,17 @@ extern "C" {
 
 
 #ifdef _USE_HW_LCD
+#define				 LCD_WIDTH		HW_LCD_WIDTH
+#define				 LCD_HEIGHT		HW_LCD_HEIGHT
+
+enum LcdColor
+{
+	BLACK = 0x00U,
+	WHITE = 0x01U,
+
+};
+
+
 
 
 
@@ -22,6 +33,8 @@ typedef struct
 	uint32_t 	(*getWidth)(void);
 	uint32_t 	(*getHeight)(void);
 
+	bool			(*sendbuffer)(uint8_t *buf);
+
 } lcd_driver_t;
 
 
@@ -29,11 +42,15 @@ typedef struct
 
 
 bool lcdInit(void);
-
-
-
-
-
+bool lcdUpdateFrame(void);
+void lcdDrawPixel(uint32_t x, uint32_t y, uint8_t color);
+void lcdFillScreen(uint8_t color);
+void lcdPutchar(uint32_t x, uint32_t y, char ch, uint8_t color);
+void lcdPrintf(uint32_t x, uint32_t y, uint8_t color, const char *fmt, ...);
+void lcdDrawLine(uint32_t x0, uint32_t y0, uint32_t x1, uint32_t y1, uint8_t color);
+void lcdDrawTriangle(uint32_t x0, uint32_t y0,uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint8_t color);
+void lcdDrawRectangle(uint32_t x, uint32_t y, uint32_t line_x, uint32_t line_y, uint8_t color);
+void lcdDrawCircle(uint32_t par_x, uint32_t par_y, uint32_t par_r, uint8_t color);
 
 
 
