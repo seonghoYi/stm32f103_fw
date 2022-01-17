@@ -16,7 +16,7 @@
 
 
 #define _USE_HW_LCD
-#define 		 HW_LCD_CH_MAX					2
+#define 		 HW_LCD_CH_MAX					1
 
 
 #endif /* SRC_HW_HW_DEF_H_ */

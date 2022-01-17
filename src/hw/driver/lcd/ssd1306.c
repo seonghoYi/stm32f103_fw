@@ -17,7 +17,7 @@
 
 
 static bool is_init = false;
-
+static void (*frameCallBack)(void) = NULL;
 
 bool 			ssd1306Reset(void);
 bool 			ssd1306SetWidth(uint32_t x);
@@ -25,6 +25,7 @@ bool 			ssd1306SetHeight(uint32_t y);
 uint32_t 	ssd1306GetWidth(void);
 uint32_t 	ssd1306GetHeight(void);
 bool			ssd1306SendBuffer(uint8_t *buf);
+bool ssd1306SetCallBack(void (*func)(void));
 
 
 bool ssd1306WriteCommand(uint8_t cmd)
@@ -40,14 +41,17 @@ bool ssd1306WriteCommand(uint8_t cmd)
 
 bool ssd1306WriteData(uint8_t *buf)
 {
-	bool ret = false;
+	bool ret = true;
 	for (int i = 0; i < SSD1306_NUM_PAGE; i++)
 	{
-		ssd1306WriteCommand(0xB0 + i);
-		ssd1306WriteCommand(0x00);
-		ssd1306WriteCommand(0x10);
+		ret &= ssd1306WriteCommand(0xB0 + i);
+		ret &= ssd1306WriteCommand(0x00);
+		ret &= ssd1306WriteCommand(0x10);
 
-		ret &= i2cMemWrite(_DEF_SSD1306, _DEF_SSD1306_I2C_ADDR, 0x40, 1, &buf[SSD1306_WIDTH * i], SSD1306_WIDTH);
+		if(i2cMemWrite(_DEF_SSD1306, _DEF_SSD1306_I2C_ADDR, 0x40, 1, &buf[SSD1306_WIDTH * i], SSD1306_WIDTH) == 0)
+		{
+			ret = false;
+		}
 	}
 	return ret;
 }
@@ -71,6 +75,7 @@ bool ssd1306DriverInit(lcd_driver_t *lcd_driver)
 	lcd_driver->setHeight 	= ssd1306SetHeight;
 	lcd_driver->getWidth 		= ssd1306GetWidth;
 	lcd_driver->getHeight 	= ssd1306GetHeight;
+	lcd_driver->setCallBack = ssd1306SetCallBack;
 	lcd_driver->sendbuffer 	= ssd1306SendBuffer;
 
 	return true;
@@ -81,54 +86,54 @@ bool ssd1306Reset(void)
 {
 	bool ret = true;
 
-	i2cBegin(_DEF_I2C1, 400);
+	ret &= i2cBegin(_DEF_I2C1, 100);
 
 
-	ssd1306WriteCommand(0xAE); //Off display
+	ret &= ssd1306WriteCommand(0xAE); //Off display
 
-	ssd1306WriteCommand(0x20); //Set memory addressing mode
-	ssd1306WriteCommand(0x02); //00b: Horizontal addressing mode 01b: Vertical addressing mode 10b: Page addressing mode
+	ret &= ssd1306WriteCommand(0x20); //Set memory addressing mode
+	ret &= ssd1306WriteCommand(0x02); //00b: Horizontal addressing mode 01b: Vertical addressing mode 10b: Page addressing mode
 
-	ssd1306WriteCommand(0xB0); //Set page start address
+	ret &= ssd1306WriteCommand(0xB0); //Set page start address
 
-	ssd1306WriteCommand(0xC8); //Set COM output direction
+	ret &= ssd1306WriteCommand(0xC8); //Set COM output direction
 
-	ssd1306WriteCommand(0x00); //Set low column address
-	ssd1306WriteCommand(0x10); //Set high column address
+	ret &= ssd1306WriteCommand(0x00); //Set low column address
+	ret &= ssd1306WriteCommand(0x10); //Set high column address
 
-	ssd1306WriteCommand(0x40); //Set start line address
+	ret &= ssd1306WriteCommand(0x40); //Set start line address
 
-	ssd1306WriteCommand(0x81);
-	ssd1306WriteCommand(0x7F); //Set contrast control
+	ret &= ssd1306WriteCommand(0x81);
+	ret &= ssd1306WriteCommand(0x7F); //Set contrast control
 
-	ssd1306WriteCommand(0xA1); //Set segment re-map
+	ret &= ssd1306WriteCommand(0xA1); //Set segment re-map
 
-	ssd1306WriteCommand(0xA6); //Set normal color
+	ret &= ssd1306WriteCommand(0xA6); //Set normal color
 
-	ssd1306WriteCommand(0xA8); //Set multiplex ratio
-	ssd1306WriteCommand(0x3F);
+	ret &= ssd1306WriteCommand(0xA8); //Set multiplex ratio
+	ret &= ssd1306WriteCommand(0x3F);
 
-	ssd1306WriteCommand(0xA4); //Set display RAM content
+	ret &= ssd1306WriteCommand(0xA4); //Set display RAM content
 
-	ssd1306WriteCommand(0xD3); //Set display offset
-	ssd1306WriteCommand(0x00); //Offset
+	ret &= ssd1306WriteCommand(0xD3); //Set display offset
+	ret &= ssd1306WriteCommand(0x00); //Offset
 
-	ssd1306WriteCommand(0xD5); //Set display clock divide ratio
-	ssd1306WriteCommand(0xF0); //Set divide ratio
+	ret &= ssd1306WriteCommand(0xD5); //Set display clock divide ratio
+	ret &= ssd1306WriteCommand(0xF0); //Set divide ratio
 
-	ssd1306WriteCommand(0xD9); //Set precharge period
-	ssd1306WriteCommand(0x22);
+	ret &= ssd1306WriteCommand(0xD9); //Set precharge period
+	ret &= ssd1306WriteCommand(0x22);
 
-	ssd1306WriteCommand(0xDA);
-	ssd1306WriteCommand(0x12); //Set COM pins hardware config
+	ret &= ssd1306WriteCommand(0xDA);
+	ret &= ssd1306WriteCommand(0x12); //Set COM pins hardware config
 
-	ssd1306WriteCommand(0xDB); //Set vcomh
-	ssd1306WriteCommand(0x20); //0.77vcc
+	ret &= ssd1306WriteCommand(0xDB); //Set vcomh
+	ret &= ssd1306WriteCommand(0x20); //0.77vcc
 
-	ssd1306WriteCommand(0x8D); //Set DC-DC enable
-	ssd1306WriteCommand(0x14);
+	ret &= ssd1306WriteCommand(0x8D); //Set DC-DC enable
+	ret &= ssd1306WriteCommand(0x14);
 
-	ssd1306WriteCommand(0xAF); //On display
+	ret &= ssd1306WriteCommand(0xAF); //On display
 
 
 
@@ -167,7 +172,27 @@ uint32_t ssd1306GetHeight()
 
 bool ssd1306SendBuffer(uint8_t *buf)
 {
-	return ssd1306WriteData(buf);
+	bool ret = true;
+
+	ret &= ssd1306WriteData(buf);
+
+	if (frameCallBack != NULL)
+	{
+		frameCallBack();
+	}
+	return ret;
+}
+
+
+bool ssd1306SetCallBack(void (*func)(void))
+{
+	bool ret = true;
+	if (func == NULL)
+	{
+		frameCallBack = func;
+	}
+
+	return ret;
 }
 
 
