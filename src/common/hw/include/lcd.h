@@ -27,8 +27,7 @@ typedef struct
 {
 	bool 			(*init)(void);
 	bool 			(*reset)(void);
-	bool 			(*setWidth)(uint32_t x);
-	bool 			(*setHeight)(uint32_t y);
+	bool			(*setWindow)(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 	uint32_t 	(*getWidth)(void);
 	uint32_t 	(*getHeight)(void);
 	bool			(*setCallBack)(void (*func)(void));

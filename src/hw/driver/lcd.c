@@ -10,11 +10,21 @@
 #include "lcd/ssd1306.h"
 static lcd_driver_t ssd1306_driver;
 uint8_t ssd1306_buffer[SSD1306_WIDTH * SSD1306_HEIGHT / SSD1306_NUM_PAGE];
+#endif
+
+
+#ifdef _USE_HW_ILI9481
+#include "lcd/ili9481.h"
+static lcd_driver_t ili9481_driver;
 
 #endif
 
 
-
+typedef struct
+{
+	uint32_t pos_x;
+	uint32_t pos_y;
+} lcd_cursor_t;
 
 typedef struct
 {
@@ -36,7 +46,7 @@ typedef struct
 
 lcd_tbl_t lcd_tbl[LCD_MAX_CH] = {
 		{false, false, &ssd1306_driver, &font_07x10, &ssd1306_buffer[0], SSD1306_WIDTH * SSD1306_HEIGHT / SSD1306_NUM_PAGE, 0, 0, 0},
-
+		{false, false, &ili9481_driver, &font_07x10, NULL, 0, 0, 0, 0},
 };
 
 
@@ -67,6 +77,13 @@ bool lcdInit()
 	ret &= ssd1306DriverInit(lcd_tbl[_DEF_LCD1].driver);
 	ret &= lcd_tbl[_DEF_LCD1].driver->setCallBack(ssd1306DoneISR);
 	ret &= lcdReset(_DEF_LCD1);
+#endif
+
+
+#ifdef _USE_HW_ILI9481
+	ret &= ili9481DriverInit(lcd_tbl[_DEF_LCD2].driver);
+	ret &= lcdReset(_DEF_LCD2);
+
 #endif
 
 	if (ret)
@@ -103,6 +120,7 @@ bool lcdReset(uint8_t ch)
 #endif
 	break;
 	case _DEF_LCD2:
+	ret &= lcd_tbl[_DEF_LCD2].driver->init();
 
 	break;
 	}

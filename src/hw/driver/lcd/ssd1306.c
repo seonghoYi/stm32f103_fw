@@ -20,12 +20,11 @@ static bool is_init = false;
 static void (*frameCallBack)(void) = NULL;
 
 bool 			ssd1306Reset(void);
-bool 			ssd1306SetWidth(uint32_t x);
-bool 			ssd1306SetHeight(uint32_t y);
+bool 			ssd1306SetWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
 uint32_t 	ssd1306GetWidth(void);
 uint32_t 	ssd1306GetHeight(void);
 bool			ssd1306SendBuffer(uint8_t *buf);
-bool ssd1306SetCallBack(void (*func)(void));
+bool 			ssd1306SetCallBack(void (*func)(void));
 
 
 bool ssd1306WriteCommand(uint8_t cmd)
@@ -71,8 +70,7 @@ bool ssd1306DriverInit(lcd_driver_t *lcd_driver)
 {
 	lcd_driver->init 				= ssd1306Init;
 	lcd_driver->reset 			= ssd1306Reset;
-	lcd_driver->setWidth 		= ssd1306SetWidth;
-	lcd_driver->setHeight 	= ssd1306SetHeight;
+	lcd_driver->setWindow		= ssd1306SetWindow;
 	lcd_driver->getWidth 		= ssd1306GetWidth;
 	lcd_driver->getHeight 	= ssd1306GetHeight;
 	lcd_driver->setCallBack = ssd1306SetCallBack;
@@ -141,19 +139,9 @@ bool ssd1306Reset(void)
 	return ret;
 }
 
-bool ssd1306SetWidth(uint32_t x)
+bool ssd1306SetWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 {
-	bool ret = false;
-
-	return ret;
-}
-
-
-bool ssd1306SetHeight(uint32_t y)
-{
-	bool ret = false;
-
-	return ret;
+	return false;
 }
 
 uint32_t ssd1306GetWidth()
