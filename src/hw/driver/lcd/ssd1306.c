@@ -41,7 +41,7 @@ bool ssd1306WriteCommand(uint8_t cmd)
 bool ssd1306WriteData(uint8_t *buf)
 {
 	bool ret = false;
-	for (int i = 0; i < 8; i++)
+	for (int i = 0; i < SSD1306_NUM_PAGE; i++)
 	{
 		ssd1306WriteCommand(0xB0 + i);
 		ssd1306WriteCommand(0x00);
@@ -81,7 +81,7 @@ bool ssd1306Reset(void)
 {
 	bool ret = true;
 
-	i2cBegin(_DEF_I2C1, 100);
+	i2cBegin(_DEF_I2C1, 400);
 
 
 	ssd1306WriteCommand(0xAE); //Off display
@@ -138,23 +138,31 @@ bool ssd1306Reset(void)
 
 bool ssd1306SetWidth(uint32_t x)
 {
+	bool ret = false;
 
+	return ret;
 }
 
 
 bool ssd1306SetHeight(uint32_t y)
 {
+	bool ret = false;
 
+	return ret;
 }
 
-uint32_t ssd1306GetWidth(void)
+uint32_t ssd1306GetWidth()
 {
+	uint32_t ret = 0;
 
+	return ret;
 }
 
-uint32_t ssd1306GetHeight(void)
+uint32_t ssd1306GetHeight()
 {
+	uint32_t ret = 0;
 
+	return ret;
 }
 
 bool ssd1306SendBuffer(uint8_t *buf)

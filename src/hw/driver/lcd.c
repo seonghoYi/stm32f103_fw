@@ -8,7 +8,7 @@
 
 #ifdef _USE_HW_SSD1306
 #include "lcd/ssd1306.h"
-uint8_t buffer[LCD_WIDTH * LCD_HEIGHT / 8];
+uint8_t ssd1306_buffer[SSD1306_WIDTH * SSD1306_HEIGHT / SSD1306_NUM_PAGE];
 #endif
 
 
@@ -57,24 +57,24 @@ bool lcdUpdateFrame(void)
 {
 	bool ret = false;
 
-	ret = lcd_driver.sendbuffer((uint8_t *)&buffer[0]);
-	memset(&buffer[0], 0, sizeof(buffer));
+	ret = lcd_driver.sendbuffer((uint8_t *)&ssd1306_buffer[0]);
+	memset(&ssd1306_buffer[0], 0, sizeof(ssd1306_buffer));
 
 	return ret;
 }
 
 void lcdDrawPixel(uint32_t x, uint32_t y, uint8_t color)
 {
-	if(x > LCD_WIDTH || y > LCD_HEIGHT) return;
+	if(x > SSD1306_WIDTH || y > SSD1306_HEIGHT) return;
 
 
 	if (color)
 	{
-		buffer[x + LCD_WIDTH * (y / 8)] |= 1<<(y%8);
+		ssd1306_buffer[x + SSD1306_WIDTH * (y / SSD1306_NUM_PAGE)] |= 1<<(y%8);
 	}
 	else
 	{
-		buffer[x + LCD_WIDTH * (y / 8)] &= ~(1<<(y%8));
+		ssd1306_buffer[x + SSD1306_WIDTH * (y / SSD1306_NUM_PAGE)] &= ~(1<<(y%8));
 	}
 
 
@@ -82,9 +82,9 @@ void lcdDrawPixel(uint32_t x, uint32_t y, uint8_t color)
 
 void lcdFillScreen(uint8_t color)
 {
-	for(int i = 0; i < LCD_WIDTH; i++)
+	for(int i = 0; i < SSD1306_WIDTH; i++)
 	{
-		for(int j = 0; j < LCD_HEIGHT; j++)
+		for(int j = 0; j < SSD1306_HEIGHT; j++)
 		{
 			lcdDrawPixel(i, j, color);
 		}
@@ -134,7 +134,7 @@ void lcdPrintf(uint32_t x, uint32_t y, uint8_t color, const char *fmt, ...)
 		lcdPutchar(x, y, print_buffer[i], color);
 		x+=font->width;
 
-		if(x + font->width > HW_LCD_WIDTH)
+		if(x + font->width > SSD1306_WIDTH)
 		{
 			x = pre_x;
 			y += font->height;
@@ -201,7 +201,7 @@ void lcdDrawCircle(uint32_t par_x, uint32_t par_y, uint32_t par_r, uint8_t color
 	int32_t err = 2 - 2 * par_r;
 	int32_t e2;
 
-	if (par_x >= HW_LCD_WIDTH || par_y >= HW_LCD_HEIGHT) {
+	if (par_x >= SSD1306_WIDTH || par_y >= SSD1306_HEIGHT) {
 		return;
 	}
 

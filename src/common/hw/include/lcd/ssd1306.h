@@ -11,11 +11,13 @@ extern "C" {
 
 
 #ifdef _USE_HW_SSD1306
+#define 			 SSD1306_WIDTH			HW_SSD1306_WIDTH
+#define 			 SSD1306_HEIGHT			HW_SSD1306_HEIGHT
+#define				 SSD1306_NUM_PAGE		8
+
+
 #include "lcd.h"
 
-
-#define SSD1306_WIDTH						128
-#define SSD1306_HEIGHT					64
 
 
 

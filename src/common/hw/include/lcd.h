@@ -9,8 +9,6 @@ extern "C" {
 
 
 #ifdef _USE_HW_LCD
-#define				 LCD_WIDTH		HW_LCD_WIDTH
-#define				 LCD_HEIGHT		HW_LCD_HEIGHT
 
 enum LcdColor
 {
