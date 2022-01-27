@@ -160,9 +160,56 @@ void ili9481WriteCommand(uint8_t com);
 uint8_t ili9481ReadData(void);
 bool ili9481Reset();
 bool ili9481SetAddrWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h);
-
+bool ili9481SetRotation(uint8_t r);
 
 void ili9481SetPixel(uint32_t x, uint32_t y);
+
+
+
+
+void H_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c)
+{
+  unsigned int i,j;
+
+  gpioPinWrite(_DEF_ILI9481_RS, _DEF_LOW);
+  gpioPinWrite(_DEF_ILI9481_CS, _DEF_HIGH);
+
+  l=l+x;
+  ili9481SetAddrWindow(x, y, l, y);
+  j=l*2;
+  for(i=1;i<=j;i++)
+  {
+  	ili9481WriteData(c);
+  }
+  gpioPinWrite(_DEF_ILI9481_CS, _DEF_LOW);
+}
+
+void V_line(unsigned int x, unsigned int y, unsigned int l, unsigned int c)
+{
+  unsigned int i,j;
+
+  gpioPinWrite(_DEF_ILI9481_RS, _DEF_LOW);
+  gpioPinWrite(_DEF_ILI9481_CS, _DEF_HIGH);
+  l=l+y;
+  ili9481SetAddrWindow(x,y,x,l);
+  j=l*2;
+  for(i=1;i<=j;i++)
+  {
+  	ili9481WriteData(c);
+  }
+  gpioPinWrite(_DEF_ILI9481_CS, _DEF_LOW);
+}
+
+
+void Rect(unsigned int x,unsigned int y,unsigned int w,unsigned int h,unsigned int c)
+{
+  H_line(x  , y  , w, c);
+  H_line(x  , y+h, w, c);
+  V_line(x  , y  , h, c);
+  V_line(x+w, y  , h, c);
+}
+
+
 
 bool ili9481Init()
 {
@@ -171,12 +218,11 @@ bool ili9481Init()
 	ret &= ili9481InitGPIO();
 	ret &= ili9481Reset();
 
-	for (int i = 0; i < ILI9481_WIDTH; i++)
+
+	for(int i = 0; i < ILI9481_WIDTH; i++)
 	{
-		ili9481SetPixel(i, 200);
+		ili9481SetPixel(i, 240);
 	}
-
-
 
 	return ret;
 }
@@ -202,89 +248,137 @@ bool ili9481DriverInit(lcd_driver_t *lcd_driver)
 bool ili9481Reset()
 {
 	bool ret = true;
-	gpioPinWrite(_DEF_ILI9481_CS, _DEF_LOW);
-	delay(100);
+	gpioPinWrite(_DEF_ILI9481_RST, _DEF_LOW);
+	delay(5);
 	gpioPinWrite(_DEF_ILI9481_RST, _DEF_HIGH);
 	delay(100);
 	gpioPinWrite(_DEF_ILI9481_RST, _DEF_LOW);
+	delay(5);
+	gpioPinWrite(_DEF_ILI9481_RD, _DEF_LOW);
+	delay(5);
+	gpioPinWrite(_DEF_ILI9481_WR, _DEF_LOW);
+	delay(5);
 	gpioPinWrite(_DEF_ILI9481_CS, _DEF_HIGH);
+	delay(5);
 
 	ili9481WriteCommand(ILI9481_COM_EXIT_SLEEP_MODE);
 	delay(20);
 
 	ili9481WriteCommand(ILI9481_COM_POWER_SETTING);
+	delay(5);
 	ili9481WriteData(0x07);
+	delay(5);
 	ili9481WriteData(0x42);
+	delay(5);
 	ili9481WriteData(0x18);
+	delay(5);
 
 	ili9481WriteCommand(ILI9481_COM_VCOM_CONTROL);
+	delay(5);
 	ili9481WriteData(0x00);
+	delay(5);
 	ili9481WriteData(0x07);
+	delay(5);
 	ili9481WriteData(0x10);
+	delay(5);
 
 
 	ili9481WriteCommand(ILI9481_COM_POWER_SET_FOR_NORMAL_MODE);
+	delay(5);
 	ili9481WriteData(0x01);
+	delay(5);
 	ili9481WriteData(0x02);
+	delay(5);
 
 
 	ili9481WriteCommand(ILI9481_COM_PANEL_DRIVING_SETTING);
-	ili9481WriteData(0x10);
-	ili9481WriteData(0x3B);
+	delay(5);
 	ili9481WriteData(0x00);
+	delay(5);
+	ili9481WriteData(0x3B);
+	delay(5);
+	ili9481WriteData(0x00);
+	delay(5);
 	ili9481WriteData(0x02);
+	delay(5);
 	ili9481WriteData(0x11);
+	delay(5);
 
 
 	ili9481WriteCommand(ILI9481_COM_FRAME_RATE_INVERSION_CONTROL);
+	delay(5);
 	ili9481WriteData(0x03);
+	delay(5);
 
-
-	ili9481WriteCommand(ILI9481_COM_GAMMA_SETTING);
-	ili9481WriteData(0x00);
-	ili9481WriteData(0x32);
-	ili9481WriteData(0x36);
-	ili9481WriteData(0x45);
-	ili9481WriteData(0x06);
-	ili9481WriteData(0x16);
-	ili9481WriteData(0x37);
-	ili9481WriteData(0x75);
-	ili9481WriteData(0x77);
-	ili9481WriteData(0x54);
-	ili9481WriteData(0x0C);
-	ili9481WriteData(0x00);
-
+	/*
 	ili9481WriteCommand(ILI9481_COM_SET_ADDRESS_MODE);
+	delay(5);
 	ili9481WriteData(0x0A);
+	delay(5);
+	*/
+
+	ili9481SetRotation(2);
+	delay(5);
 
 	ili9481WriteCommand(ILI9481_COM_SET_PIXEL_FORMAT);
+	delay(5);
 	ili9481WriteData(0x55);
+	delay(5);
+
+	ili9481WriteCommand(ILI9481_COM_SET_COLUMN_ADDRESS);
+	delay(5);
+	ili9481WriteData(0x00);
+	delay(5);
+	ili9481WriteData(0x00);
+	delay(5);
+	ili9481WriteData(0x01);
+	delay(5);
+	ili9481WriteData(0x3F);
+	delay(5);
+
+	ili9481WriteCommand(ILI9481_COM_SET_PAGE_ADDRESS);
+	delay(5);
+	ili9481WriteData(0x00);
+	delay(5);
+	ili9481WriteData(0x00);
+	delay(5);
+	ili9481WriteData(0x01);
+	delay(5);
+	ili9481WriteData(0xE0);
+	delay(5);
 
 
 	ili9481WriteCommand(ILI9481_COM_GAMMA_SETTING);
+	delay(5);
 	ili9481WriteData(0x00);
+	delay(5);
 	ili9481WriteData(0x32);
+	delay(5);
 	ili9481WriteData(0x36);
-
-	ili9481WriteCommand(ILI9481_COM_SET_COLUMN_ADDRESS);
+	delay(5);
+	ili9481WriteData(0x45);
+	delay(5);
+	ili9481WriteData(0x06);
+	delay(5);
+	ili9481WriteData(0x16);
+	delay(5);
+	ili9481WriteData(0x37);
+	delay(5);
+	ili9481WriteData(0x75);
+	delay(5);
+	ili9481WriteData(0x77);
+	delay(5);
+	ili9481WriteData(0x54);
+	delay(5);
+	ili9481WriteData(0x0C);
+	delay(5);
 	ili9481WriteData(0x00);
-	ili9481WriteData(0x00);
-	ili9481WriteData(0x01);
-	ili9481WriteData(0x3F);
-
-
-	ili9481WriteCommand(ILI9481_COM_SET_PAGE_ADDRESS);
-	ili9481WriteData(0x00);
-	ili9481WriteData(0x00);
-	ili9481WriteData(0x01);
-	ili9481WriteData(0xE0);
 
 	delay(120);
 
-	ili9481WriteCommand(ILI9481_COM_ENTER_INVERT_MODE);
-
 
 	ili9481WriteCommand(ILI9481_COM_SET_DISPLAY_ON);
+
 
 	return ret;
 }
@@ -292,7 +386,8 @@ bool ili9481Reset()
 
 void ili9481WriteData(uint8_t data)
 {
-	gpioPinWrite(_DEF_ILI9481_WR, _DEF_HIGH);
+	gpioPinWrite(_DEF_ILI9481_RS, _DEF_LOW);
+
 
 	ili9481BusMode(_DEF_OUTPUT);
 	gpioPinWrite(_DEF_ILI9481_D0, data & 0x0001);
@@ -304,8 +399,9 @@ void ili9481WriteData(uint8_t data)
 	gpioPinWrite(_DEF_ILI9481_D6, data & 0x0040);
 	gpioPinWrite(_DEF_ILI9481_D7, data & 0x0080);
 
-	gpioPinWrite(_DEF_ILI9481_WR, _DEF_LOW);
+	gpioPinWrite(_DEF_ILI9481_WR, _DEF_HIGH);
 	delay_us(1);
+	gpioPinWrite(_DEF_ILI9481_WR, _DEF_LOW);
 }
 
 
@@ -313,8 +409,11 @@ uint8_t ili9481ReadData()
 {
 	uint8_t ret = 0;
 
+	gpioPinWrite(_DEF_ILI9481_RS, _DEF_LOW);
 
 	gpioPinWrite(_DEF_ILI9481_RD, _DEF_HIGH);
+	delay_us(1);
+
 
 	ili9481BusMode(_DEF_INPUT);
 	ret |= gpioPinRead(_DEF_ILI9481_D0) << 0x0000;
@@ -325,8 +424,9 @@ uint8_t ili9481ReadData()
 	ret |= gpioPinRead(_DEF_ILI9481_D5) << 0x0005;
 	ret |= gpioPinRead(_DEF_ILI9481_D6) << 0x0006;
 	ret |= gpioPinRead(_DEF_ILI9481_D7) << 0x0007;
+
+
 	gpioPinWrite(_DEF_ILI9481_RD, _DEF_LOW);
-	delay_us(1);
 
 	return ret;
 }
@@ -334,7 +434,22 @@ uint8_t ili9481ReadData()
 
 void ili9481WriteCommand(uint8_t com)
 {
-	ili9481WriteData(com);
+	gpioPinWrite(_DEF_ILI9481_RS, _DEF_HIGH);
+
+
+	ili9481BusMode(_DEF_OUTPUT);
+	gpioPinWrite(_DEF_ILI9481_D0, com & 0x0001);
+	gpioPinWrite(_DEF_ILI9481_D1, com & 0x0002);
+	gpioPinWrite(_DEF_ILI9481_D2, com & 0x0004);
+	gpioPinWrite(_DEF_ILI9481_D3, com & 0x0008);
+	gpioPinWrite(_DEF_ILI9481_D4, com & 0x0010);
+	gpioPinWrite(_DEF_ILI9481_D5, com & 0x0020);
+	gpioPinWrite(_DEF_ILI9481_D6, com & 0x0040);
+	gpioPinWrite(_DEF_ILI9481_D7, com & 0x0080);
+
+	gpioPinWrite(_DEF_ILI9481_WR, _DEF_HIGH);
+	delay_us(1);
+	gpioPinWrite(_DEF_ILI9481_WR, _DEF_LOW);
 }
 
 
@@ -355,11 +470,49 @@ bool ili9481SetAddrWindow(uint32_t x, uint32_t y, uint32_t w, uint32_t h)
 }
 
 
+bool ili9481SetRotation(uint8_t r)
+{
+	bool ret = true;
+
+
+	uint8_t com = 0x00;
+
+	//0x20: page/column order
+	//0x40: column address order
+	//0x80: page address order
+	//0x08: RGB order
+
+	switch(r)
+	{
+	case 0:
+		com = 0x80;
+		break;
+	case 1:
+		com = 0x80 | 0x40 | 0x20;
+		break;
+	case 2:
+		com = 0x40;
+		break;
+	case 3:
+		com = 0x20;
+		break;
+	}
+
+	ili9481WriteCommand(ILI9481_COM_SET_ADDRESS_MODE);
+	delay(5);
+	ili9481WriteData(com | 0x08);
+
+	return ret;
+}
+
+
 void ili9481SetPixel(uint32_t x, uint32_t y)
 {
+	gpioPinWrite(_DEF_ILI9481_CS, _DEF_HIGH);
 	ili9481SetAddrWindow(x, y, 1, 1);
+	ili9481WriteData(0xF8);
 	ili9481WriteData(0x00);
-	ili9481WriteData(0x00);
+	gpioPinWrite(_DEF_ILI9481_CS, _DEF_LOW);
 }
 
 
